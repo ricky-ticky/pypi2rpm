@@ -2,10 +2,13 @@ import urllib2
 import simplejson
 import tarfile
 import sys
+import subprocess
+import os
 
 class pypackage:
 	
 	def __init__(self,name,path="/tmp"):
+		"""you need to setup name of pypi package and path, if you don't whant to use defaults /tmp"""
 		self.name = str(name)
 		self.path = path
 		self.json_request = self.get_json_req()
@@ -80,20 +83,26 @@ class pypackage:
 			print "URL Error:",e.reason , self.url
         
 	def extract(self):
-		"""extract archive into path"""
+		"""extract archive into path. if there is no archive, download it"""
 		try:
 			self.tar = tarfile.open(self.filepath)
-			#need to check if we can use tarfile module
-			tar.extractall(path=self.path)
-			tar.close()
+			self.archroot = tar.getnames()[0]
+			self.tar.extractall(path=self.path)
 		except :
 			if self.download():
 				self.tar = tarfile.open(self.filepath)
-				tar.extractall(path=self.path)
-				tar.close()
+				self.archroot = self.tar.getnames()[0]
+				self.tar.extractall(path=self.path)
 			else:
 				sys.exit(1)
-
-
-
-
+		finally:
+			self.tar.close()
+			#os.rm(self.filepath)
+	
+	def make_specfile(self):
+		"""generate a specfile for python package"""
+		#TODO: get workdir from args if package already downloaded and extracted
+		self.workdir=(self.path + "/" + self.archroot)
+		os.chdir(self.workdir)
+		subprocess.call(["python", "setup.py", "bdist_rpm", "--spec-only", "-d", "."])
+		#TODO: change to bdist_altrpm
