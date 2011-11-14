@@ -5,6 +5,6 @@ import sys
 
 name = sys.argv[1]
 
-package = pypi.pypackage(name)
+package = pypi.PyPackage(name)
 package.extract()
 package.make_specfile()

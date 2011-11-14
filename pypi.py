@@ -5,7 +5,7 @@ import sys
 import subprocess
 import os
 
-class pypackage:
+class PyPackage(object):
 	
 	def __init__(self,name,path="/tmp"):
 		"""you need to setup name of pypi package and path, if you don't whant to use defaults /tmp"""
@@ -88,15 +88,17 @@ class pypackage:
 			self.tar = tarfile.open(self.filepath)
 			self.archroot = tar.getnames()[0]
 			self.tar.extractall(path=self.path)
+			self.tar.close()
 		except :
 			if self.download():
 				self.tar = tarfile.open(self.filepath)
 				self.archroot = self.tar.getnames()[0]
 				self.tar.extractall(path=self.path)
+				self.tar.close()
 			else:
 				sys.exit(1)
-		finally:
-			self.tar.close()
+		#finally:
+			#self.tar.close()
 			#os.rm(self.filepath)
 	
 	def make_specfile(self):
